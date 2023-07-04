@@ -1,0 +1,52 @@
+@@ -1,24 +1,35 @@
+import numpy
+from matplotlib import pyplot
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Reading in the dataset
+def dataset(datafile = "data/plenty.data"):
+def dataclean(datafile = "data/plenty.data"):
+
+    # Creating empty list
+    alldata = []
+
+    with open(datafile) as data:
+        x = []
+        y = []
+
+#Converting the space separated dataset into floats
+        for line in data.readlines():
+            element = line.split()
+            # Splitting the line into separate elements
+            element = line.split()   
+            # Adding the elements to the list
+            alldata.append(element)  
+
+        # Converting list into a numpy array using floats
+        alldataarray = np.array(alldata, dtype=float)
+
+    return alldataarray
+
+def dataplot(alldataarray):
+    # Plotting the first float and all other floats
+    plt.plot(alldataarray[:, 0], alldataarray[:, 1:])
+    # Formatting the graph
+    plt.title('Plenty Data')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.show()
+
+#Plotting the 2D data
+            x.append(float(element[0]))
+            y.append(float(element[1]))
+    return [x, y]
+
+if __name__ == "__main__":
+    x,y = dataset()
+    print(x)
+    print(y)
+    #pyplot.plot(x, y)
+    #pyplot.show()
+    alldataarray = dataclean()
+    dataplot(alldataarray)
