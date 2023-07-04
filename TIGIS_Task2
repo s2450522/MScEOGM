@@ -1,0 +1,115 @@
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+from cartopy.io.img_tiles import Stamen
+
+#Reading in the .data dataset
+def dataclean(datafile = "data/natural_neighbourhoods.dat"):
+
+    # Creating an empty dictionary
+    neigh_dict = {}
+
+    with open(datafile) as raw_data:
+        for line in raw_data.readlines():          
+
+# Skipping lines starting with a comment (#)
+            if line.startswith('#'):
+                pass
+            
+            # Asigning the key and values to the dictionary at lines with the Neighbourhood name
+            elif line[0].isalpha():
+                neigh_name = line
+                xdata, ydata = [],[]
+
+            # For lines containing coordinates listed in separate lines
+            elif line.startswith("("):
+                no_end1 = line.strip("\n")
+                # Removing parentheses
+                no_brac1 = no_end1.strip("()")
+                # Splitting the coordinate pair into single coordinates
+                coord1 = no_brac1.split(", ")
+
+                # Converting coordinates to floats
+                xelement = float(coord1[0])
+                yelement = float(coord1[1])
+                # Adding the floats to the lists within the dictionary
+                xdata.append(xelement)
+                ydata.append(yelement)
+
+            # For lines containing coordinates listed one after another on the same line
+            elif line.startswith("[("):
+                no_end2 = line.strip("\n")
+                # Removing square and curved parentheses
+                no_brac2 = no_end2.strip("[()]")
+                # Splitting the line into pairs of coordinates
+                row_split_lines = no_brac2.split("), (")
+                for coords in row_split_lines:
+                    # Splitting the coordinate pair into single floats
+                    coord2 = coords.split(", ")
+
+                    # Converting coordinates to floats
+                    xelement2 = float(coord2[0])
+                    yelement2 = float(coord2[1])
+                    # Adding the floats to the lists within the dictionary
+                    xdata.append(xelement2)
+                    ydata.append(yelement2)
+
+            # Sectioning the dictionary at empty lines
+            elif line.isspace():
+                neigh_dict[neigh_name] = (xdata,ydata)
+
+    return neigh_dict
+    
+
+def dataplot(neigh_dict):
+
+    # Adding Stamen background map and formatting
+    background = Stamen(style = "terrain-background")
+    map = plt.axes(projection=background.crs)
+    map.add_image(background, 12)
+    map.gridlines(draw_labels = True)
+    map = plt.title("Natural Neighbourhoods of Edinburgh")
+    map = plt.xlabel("Easting")
+    map = plt.ylabel("Northing")
+    map = plt.grid()
+
+
+    # Plotting the cleaned Natural Nighbourhood dataset
+    for neighbourhood in neigh_dict:
+        plt.plot(neigh_dict[neighbourhood][0],neigh_dict[neighbourhood][1], transform=ccrs.OSGB(approx=False), color='purple')
+
+    # Exporting and showing the map
+    plt.savefig("Natural Neighbourhoods of Edinburgh.png")
+    plt.show()
+
+if __name__ == "__main__":
+    neigh_dict = dataclean()
+    dataplot(neigh_dict)
+
+# The plt.xlabel, plt.ylabel and plt.grid are not being read and therefore not producing axes for this map. 
+# The following code would have been used for creating a cleaner grid, but this was not possible since the version of cartopy installed contains errors/bugs.
+    # map.set_extent([308000,335000,657500,680000], ccrs.OSGB())
+    # map.gridlines(draw_labels = True, crs=ccrs.OSGB)
+# Following code outline would have been used to add a north arrow png image (same reason as above).
+    # im = plt.imread("north_arrow")
+    # fig, ax = plt.subplots()
+    # ax.plot(range())
+    # newax = fig.axes([], anchor = 'NE')
+    # newax.imshow(im)
+    # newax.axis('off')
+    # plt.show()
+# Following code to be used as formatting
+    # plt.figure(figsize=(11.69, 8.27), dpi=100)
+# The following code could be used as an outline for creating labels for the neighbourhoods    
+    #  xmax = max(neigh_dict[neighbourhood][0])
+    # xmin = min(neigh_dict[neighbourhood][0])
+    # ymax = max(neigh_dict[neighbourhood][1])
+    # ymin = min(neigh_dict[neighbourhood][1])
+    # xcenter = ((xmax - xmin)/2)+xmin
+    # ycenter = ((ymax-ymin)/2)+ymin
+    # xcent = int(xcenter)
+    # ycent = int(ycenter)
+    # pyplot.annotate(neighbourhood["Neighbourhood"], xytext = (xcent, ycent))
+
+# References
+    # The City of Eidnburgh Council, 2021. Natural Neighbourhoods. Edinburgh. https://data.edinburghcouncilmaps.info/datasets/9961be54aa5649aebfb5f2cde53fa432_27/explore
+    # Met Office, 2015. Cartopy: A cartographic python library with Matplotlib interface. Exeter. https://scitools.org.uk/cartopy 
